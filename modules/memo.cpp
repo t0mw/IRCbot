@@ -48,6 +48,8 @@ void memo( string nick, string channel, string msg, IRC *circ ) {
     if( end == 0 ) return;  // should be 1 min
 
     if( end != -1 ) {
+		if( msg[end+1] != ' ' ) return;
+		
         string to_nick = msg.substr( 0, end );
         if( to_nick != nick ) {
             // check if nick in channel

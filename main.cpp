@@ -1,7 +1,7 @@
 #include <iostream>
 #include "ircbot.hpp"
 #include "modules/print_wwwtitle.hpp"
-#include "modules/memo.cpp"
+#include "modules/memo.hpp"
 
 void pmhandler_test( string nick, string channel, string msg, IRC *circ ) {
 
@@ -46,7 +46,7 @@ void bot_query( string nick, string channel, string msg, IRC *circ ) {
 
 	if( nick == "admin" ) {
 		string s = "PRIVMSG admin :hi\r\n";
-		send_d( s );
+		circ->send_d( s );
 	}
 
 }
