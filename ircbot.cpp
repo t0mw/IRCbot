@@ -358,19 +358,19 @@ void IRC::start() {
                     ircprot_buf += "PRIVMSG NickServ :identify ";
                     ircprot_buf += this->services_passwd;
                     ircprot_buf += "\r\n";
-                    this->send_d( ircprot_buf );
 
 					// Wait for ID string, break if received more than max_id_checks lines without it.
                     int max_id_checks = 100;
                     #ifdef WIN32
-                        while( ( n = recv( this->sockfd, buf, sizeof(buf), 0 ) ) > 0 ) {
+                        while( this->send_d(ircprot_buf), ( n = recv( this->sockfd, buf, sizeof(buf), 0 ) ) > 0 ) {
                     #else
-                        while( ( n = read( this->sockfd, buf, sizeof(buf) ) ) > 0 ) {
+                        while( this->send_d(ircprot_buf), ( n = read( this->sockfd, buf, sizeof(buf) ) ) > 0 ) {
                     #endif
                             if( max_id_checks-- < 0 ) {
                                 #ifdef VERBOSE
                                     cout << "failed!\n";
                                 #endif
+                                this->quit();
                                 break;
                             } else if( strstr( buf, this->services_id_msg.c_str() ) ) {
                                 #ifdef VERBOSE

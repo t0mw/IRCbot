@@ -10,6 +10,7 @@ using namespace std;
 string parsetitle( string data ) {
 
     string ret;
+    int ret_index = 0;
 	int start = 0, end = 0;
 
 	start = data.find( "<title>" );
@@ -17,14 +18,22 @@ string parsetitle( string data ) {
 
 	if( start < 0 || end < 0 ) return string();
 
-    for( int i = start; i < end; i++ ) {
-        if( data[i] == '\n' || data[i] == '\r' ) {  // newline filter
-            end = i-1;
-            break;
+    for( int i = start+7; i < end; i++ ) {
+        if( data[i] == '\n' || data[i] == '\r' || data[i] == ' ' ) {  // newline & doublespace filter
+            if( ret_index != 0 && ret[ret_index-1] != ' ' ) {
+                ret += ' ';
+                ret_index++;
+                //continue;
+            }
+            continue;
+            // end = i-1;
+            // break;
         }
+        ret_index++;
+        ret += data[i];
     }
 
-    ret = data.substr( start + 7, end - start - 7 );	// 7 == strlen( "<title>" )
+    // ret = data.substr( start + 7, end - start - 7 );	// 7 == strlen( "<title>" )
 
     return ret;
 
@@ -60,6 +69,16 @@ string download_single_url( string url ) {
 			curl_easy_setopt( curl_fd, CURLOPT_VERBOSE, 1 );
 		#endif
 
+		#ifdef UW_CHUJNIA
+		int pos = 0;
+		if( (pos = url.find("https")) >= 0 ) {
+			url.replace( pos, pos + 5, "http" );
+		}
+		#else
+			#error CHUJOWY KOD w download single url!
+		#endif
+
+
 		struct curl_slist *headers = NULL;
 		
 		// headers = curl_slist_append( headers, "User-Agent: Mozilla/5.0 (Windows NT 6.1; rv:19.0) Gecko/20100101 Firefox/19.0" );
@@ -69,9 +88,12 @@ string download_single_url( string url ) {
 		
 		curl_easy_setopt( curl_fd, CURLOPT_HTTPHEADER, headers );
 		curl_easy_setopt( curl_fd, CURLOPT_URL, url.c_str() );
-		curl_easy_setopt( curl_fd, CURLOPT_FOLLOWLOCATION, 1 );
+		curl_easy_setopt( curl_fd, CURLOPT_FOLLOWLOCATION, 0 );
 		curl_easy_setopt( curl_fd, CURLOPT_WRITEFUNCTION, curl_strsave );
 		curl_easy_setopt( curl_fd, CURLOPT_WRITEDATA, &ret );
+
+		curl_easy_setopt( curl_fd, CURLOPT_TIMEOUT, 20 );
+		curl_easy_setopt( curl_fd, CURLOPT_CONNECTTIMEOUT, 20 );
 
         // curl_easy_setopt( curl_fd, CURLOPT_PROXY, "127.0.0.1:9050" );
         // curl_easy_setopt( curl_fd, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5_HOSTNAME );

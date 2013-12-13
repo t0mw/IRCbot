@@ -19,7 +19,7 @@ void print_wwwtitle( string nick, string channel, string msg, IRC *circ ) {
         string title = get_title( link );
         if( title.empty() ) {
             #ifdef DEBUG
-                cout << "Got empty title.\n";
+                cout << "Got empty title for link: " << link << "\n";
             #endif
             return;
         }

@@ -38,7 +38,7 @@ void memo( string nick, string channel, string msg, IRC *circ ) {
 
     if( memo_list.size() >= MEMO_MAX ) { // memo too big
         memo_list.clear();
-        // return;
+        return;
     }
 
     // check if memo
@@ -48,6 +48,7 @@ void memo( string nick, string channel, string msg, IRC *circ ) {
     if( end == 0 ) return;  // should be 1 min
 
     if( end != -1 ) {
+	
 		if( msg[end+1] != ' ' ) return;
 		
         string to_nick = msg.substr( 0, end );
@@ -57,7 +58,7 @@ void memo( string nick, string channel, string msg, IRC *circ ) {
             search_in_names.to_nick = to_nick;
             search_in_names.memo = msg;
 
-            circ->add_handler( memo_names, "", "End of /NAMES list", -1 );
+            circ->add_handler( memo_names, "", "End of /NAMES list", -1 );    // MAX LINES
 
             string sbuf = "NAMES "; sbuf += channel; sbuf += "\r\n";
             circ->send_d( sbuf );
@@ -87,3 +88,22 @@ void memo_join( string nick, string channel, IRC *circ ) {
     }
 
 }
+
+void memo_print( string nick, string channel, string msg, IRC *circ ) {
+
+    if( msg.find( "queue print" ) != string::npos && nick == "widmo" ) {
+        for( vector<struct user_memo>::iterator it = memo_list.begin(); it != memo_list.end(); it++ ) {
+            string tosend = "PRIVMSG widmo :to_nick: ";
+            tosend += it->to_nick;
+            tosend += ", by_nick: ";
+            tosend += it->by_nick;
+            tosend += ", memo: ";
+            tosend += it->memo;
+            tosend += "\r\n";
+            circ->send_d( tosend );
+        }
+        circ->send_d( string("PRIVMSG widmo :- ende -\r\n") );
+    }
+
+}
+

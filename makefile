@@ -1,11 +1,13 @@
 CC = g++
-FLAGS = -Wall -Wextra
-SRCS = main.cpp ircbot.cpp modules/www_stuff.cpp modules/print_wwwtitle.cpp modules/memo.cpp
-LIB = -lcurl -L"c:\MinGW\bin" -lws2_32
-EXEC = ircbot.exe
+CFLAGS = -Wall -Wextra
+SOURCES = ircbot.cpp main.cpp modules/www_stuff.cpp modules/print_wwwtitle.cpp modules/memo.cpp modules/sjp_pwn_info.cpp
+LIB = -lcurl
+EXEC = IRCbot_qrw
+DEFINES = -DUW_CHUJNIA
 
 all:
-	$(CC) $(FLAGS) -O3 $(SRCS) -o $(EXEC) $(LIB)
-	
+	$(CC) -O3 $(CFLAGS) $(SOURCES) -o $(EXEC) $(LIB) $(DEFINES)
+
 debug:
-	$(CC) $(FLAGS) -g $(SRCS) -o $(EXEC) $(LIB)
+	$(CC) -g $(CFLAGS) $(SOURCES) -o $(EXEC) $(LIB) $(DEFINES) -DVERBOSE -DSUPER_VERBOSE -DDEBUG
+

@@ -2,12 +2,14 @@
 #include "../ircbot.hpp"
 #include "www_stuff.hpp"
 
+#define SJP_MAX_DATA 100
+
 using namespace std;
 
 void sjp_info( string nick, string channel, string msg, IRC *circ ) {
 
     int start = 0;
-    if( (start = msg.find(".sjp")) > 0 ) {
+    if( (start = msg.find(".sjp")) == 0 ) {
 
         string link = "http://sjp.pl/";
 
@@ -47,8 +49,10 @@ void sjp_info( string nick, string channel, string msg, IRC *circ ) {
                 }
             }
         }
+        
+        // cout << sjpdata;
 
-        string buf = "PRIVMSG #";
+        string buf = "PRIVMSG ";
         buf += channel;
         buf += " :";
         buf += sjpdata;
@@ -64,7 +68,7 @@ void sjp_info( string nick, string channel, string msg, IRC *circ ) {
 void pwn_info( string nick, string channel, string msg, IRC *circ ) {
 
     int start = 0;
-    if( (start = msg.find(".sjp")) > 0 ) {
+    if( (start = msg.find(".pwn")) == 0 ) {
 
         string link = "http://sjp.pwn.pl/szukaj/";
 
@@ -73,7 +77,7 @@ void pwn_info( string nick, string channel, string msg, IRC *circ ) {
         int space_pos = 0;
         while( ( space_pos = link.find(" ") ) >= 0 ) link.replace( space_pos, 1, "%20" );
 
-        cout << "Link: " << link << endl;
+        // cout << "Link: " << link << endl;
 
         string data = download_single_url( link );
 
@@ -91,7 +95,7 @@ void pwn_info( string nick, string channel, string msg, IRC *circ ) {
 
         string sjpdata = data.substr( start, end - 1 - start );
 
-        cout << "sjpdata: " << sjpdata << endl;
+        // cout << "sjpdata: " << sjpdata << endl;
 
         int delete_pos = 0;
         int delete_end_pos = 0;
@@ -123,7 +127,7 @@ void pwn_info( string nick, string channel, string msg, IRC *circ ) {
             }
         }
 
-        string buf = "PRIVMSG #";
+        string buf = "PRIVMSG ";
         buf += channel;
         buf += " :";
         buf += sjpdata;
