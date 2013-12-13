@@ -5,5 +5,6 @@ using namespace std;
 
 void memo( string nick, string channel, string msg, IRC *circ );
 void memo_join( string nick, string channel, IRC *circ );
+void memo_print( string nick, string channel, string msg, IRC *circ );
 
 #endif
