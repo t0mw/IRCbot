@@ -1,6 +1,5 @@
 #include "ircbot.hpp"
 #include "BotFunctor.hpp"
-#include "modules/sjp_pwn_info.hpp"
 #include "modules/PrintWWWTitle.hpp"
 #include "modules/UserMemo.hpp"
 #include <cstdio>
@@ -11,7 +10,7 @@ class EchoFunctor : public BotFunctor {
 
 	public:
 
-		void operator() ( string msg, IRC *circ ) {
+		void operator() ( string msg, IRCBot *circ ) {
 
 			std::cout << "EchoFunctor start.\n";
 
@@ -20,6 +19,7 @@ class EchoFunctor : public BotFunctor {
 				circ->parser.parse( msg );
 
 				if( circ->parser.get_command() == "PRIVMSG" ) {
+
 					std::cout << "\tCommand: " << circ->parser.get_command() << std::endl <<
 								 "\tChannel: " << circ->parser.get_param(0) << std::endl <<
 								 "\tMessage: " << circ->parser.get_param(1) << std::endl;
@@ -46,24 +46,23 @@ class EchoFunctor : public BotFunctor {
 		- UTF-8 support
 		- logging class
 */
-
 int main() {
 
-	IRC newirc;
+	IRCBot irc_bot;
 
 	try {
 
-		newirc.set_server( "holmes.freenode.net" );
-		newirc.set_nick( "test94384" );
+		irc_bot.set_server( "holmes.freenode.net" );
+		irc_bot.set_nick( "test94384" );
 
-		newirc.add_channel( "#chujemuje" );
-		newirc.register_handler( "#chujemuje", new EchoFunctor );
-		newirc.register_handler( "#chujemuje", new PrintWWWTitle );
-		newirc.register_handler( "#chujemuje", new UserMemo );
+		irc_bot.add_channel( "#chujemuje" );
+		irc_bot.register_handler( "#chujemuje", new EchoFunctor );
+		irc_bot.register_handler( "#chujemuje", new UserMemo );
 
-		newirc.add_channel( "#mujechuje" );
+		irc_bot.add_channel( "#mujechuje" );
+		irc_bot.register_handler( "#mujechuje", new PrintWWWTitle );
 
-		newirc.start();
+		irc_bot.start();
 
 	} catch( std::exception &e ) {
 

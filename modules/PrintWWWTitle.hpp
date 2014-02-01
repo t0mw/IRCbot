@@ -2,7 +2,7 @@
 #define __PRINTWWWTITLE_HPP__
 
 #include "../BotFunctor.hpp"
-#include "../ircbot.hpp"
+#include "../IRCBot.hpp"
 
 class PrintWWWTitle : public BotFunctor {
 
@@ -10,7 +10,7 @@ class PrintWWWTitle : public BotFunctor {
 
 		PrintWWWTitle();
 
-		void operator() ( std::string msg, IRC *circ );
+		void operator() ( std::string msg, IRCBot *circ );
 
 	private:
 

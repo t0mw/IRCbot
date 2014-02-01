@@ -1,4 +1,3 @@
-#include "../ircbot.hpp"
 #include "PrintWWWTitle.hpp"
 #include "WWWDownload.hpp"
 #include <iostream>
@@ -8,7 +7,7 @@ PrintWWWTitle::PrintWWWTitle() {
 
 }
 
-void PrintWWWTitle::operator() ( std::string msg, IRC *circ ) {
+void PrintWWWTitle::operator() ( std::string msg, IRCBot *circ ) {
 
 	circ->parser.parse( msg );
 

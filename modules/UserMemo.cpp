@@ -1,4 +1,3 @@
-#include "../ircbot.hpp"
 #include "UserMemo.hpp"
 #include <iostream>
 #include <cstring>
@@ -10,7 +9,7 @@ UserMemo::UserMemo() {
 
 }
 
-void UserMemo::operator() ( std::string recvd, IRC *circ ) {
+void UserMemo::operator() ( std::string recvd, IRCBot *circ ) {
 
 	if( memo_list.size() >= this->memo_max ) {
 		memo_list.clear();
@@ -50,7 +49,7 @@ void UserMemo::operator() ( std::string recvd, IRC *circ ) {
 
 }
 
-void UserMemo::memo_send( std::string nick, IRC *circ ) {
+void UserMemo::memo_send( std::string nick, IRCBot *circ ) {
 
 	auto memos_for_nick = this->memo_list.equal_range( nick );
 	for( auto it = memos_for_nick.first; it != memos_for_nick.second; ++it ) {

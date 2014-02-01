@@ -1,4 +1,4 @@
-#include "ircbot.hpp"
+#include "IRCBot.hpp"
 #include <iostream>
 #include <cstdio>
 #include <cstring>
@@ -15,14 +15,14 @@
 	#include <netdb.h>
 #endif
 
-IRC::IRC() {
+IRCBot::IRCBot() {
 
 	this->exit_flag = false;
 	this->prolog_end = false;
 
 }
 
-IRC::~IRC() {
+IRCBot::~IRCBot() {
 
 	for( auto it : this->handlers ) {
 		delete it.second;
@@ -30,7 +30,7 @@ IRC::~IRC() {
 
 }
 
-void IRC::set_server( string server, string services_id_msg, string motd_end_line ) {
+void IRCBot::set_server( string server, string services_id_msg, string motd_end_line ) {
 
 	this->server_host = server;
 	this->services_id_msg = services_id_msg;
@@ -38,19 +38,19 @@ void IRC::set_server( string server, string services_id_msg, string motd_end_lin
 
 }
 
-void IRC::set_nick( string new_nick ) {
+void IRCBot::set_nick( string new_nick ) {
 
 	this->nick = new_nick;
 
 }
 
-void IRC::set_services_passwd( string newpass ) {
+void IRCBot::set_services_passwd( string newpass ) {
 
 	this->services_passwd = newpass;
 
 }
 
-bool IRC::add_channel( string new_channel ) {
+bool IRCBot::add_channel( string new_channel ) {
 
 	for( auto it = this->channels.begin(); it != this->channels.end(); ++it ) {
 		if( *it == new_channel ) {
@@ -63,7 +63,7 @@ bool IRC::add_channel( string new_channel ) {
 
 }
 
-void IRC::register_handler( string channel, BotFunctor *fctr ) {
+void IRCBot::register_handler( string channel, BotFunctor *fctr ) {
 
 	// Check if channel in channels list.
 	for( auto it = this->channels.begin(); it != this->channels.end(); ++it ) {
@@ -77,7 +77,7 @@ void IRC::register_handler( string channel, BotFunctor *fctr ) {
 
 }
 
-void IRC::send_raw( string data ) {
+void IRCBot::send_raw( string data ) {
 
 	#ifdef _WIN32
 		send( this->sockfd, data.c_str(), data.length(), 0 );
@@ -87,7 +87,7 @@ void IRC::send_raw( string data ) {
 
 }
 
-void IRC::send_pm( string dest, string message ) {
+void IRCBot::send_pm( string dest, string message ) {
 
 	string msg;
 	msg += "PRIVMSG ";
@@ -108,7 +108,7 @@ void IRC::daemon_mode( bool a ) {
 }
 #endif
 
-bool IRC::init_irc_conn() {
+bool IRCBot::init_irc_conn() {
 
 	bot_log( "Connecting to host %s with nick %s... ", this->server_host.c_str(), this->nick.c_str() );
 	this->server_connect();
@@ -131,7 +131,7 @@ bool IRC::init_irc_conn() {
 
 }
 
-bool IRC::services_id() {
+bool IRCBot::services_id() {
 
 	// Services identify.
 	if( !this->services_passwd.empty() ) {
@@ -162,7 +162,7 @@ bool IRC::services_id() {
 
 }
 
-void IRC::join_channels() {
+void IRCBot::join_channels() {
 
 	string ircprot_buf;
 
@@ -186,7 +186,7 @@ void IRC::join_channels() {
 
 }
 
-string IRC::get_channel_from_str( char *buf, int buf_len ) {
+string IRCBot::get_channel_from_str( char *buf, int buf_len ) {
 
 	// Channel should be first word after #, so:
 
@@ -209,7 +209,7 @@ string IRC::get_channel_from_str( char *buf, int buf_len ) {
 
 }
 
-void IRC::bot_log( const char *format, ... ) {
+void IRCBot::bot_log( const char *format, ... ) {
 
 	#ifdef VERBOSE
 		va_list args;
@@ -220,7 +220,7 @@ void IRC::bot_log( const char *format, ... ) {
 
 }
 
-void IRC::server_connect() {
+void IRCBot::server_connect() {
 
 	#ifdef _WIN32
 		WORD version = MAKEWORD( 2, 0 );
@@ -254,7 +254,7 @@ void IRC::server_connect() {
 
 }
 
-void IRC::start() {
+void IRCBot::start() {
 
 	if( this->nick.empty() || this->server_host.empty() ) {
 		throw runtime_error( "Nick or server host not set!" );
@@ -342,7 +342,7 @@ void IRC::start() {
 
 }
 
-void IRC::quit() {
+void IRCBot::quit() {
 
 	this->send_raw( "QUIT :quit\r\n" );
 

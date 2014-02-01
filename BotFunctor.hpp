@@ -1,12 +1,12 @@
-#ifndef BOTFUNCTOR_HPP
-#define BOTFUNCTOR_HPP
+#ifndef __BOTFUNCTOR_HPP__
+#define __BOTFUNCTOR_HPP__
 
-#include "ircbot.hpp"
+#include "IRCBot.hpp"
 #include <string>
 
 using namespace std;
 
-class IRC;
+class IRCBot;
 
 class BotFunctor {
 
@@ -15,7 +15,7 @@ class BotFunctor {
 		BotFunctor();
 		virtual ~BotFunctor();
 
-		virtual void operator() ( string recvd_line, IRC *circ ) = 0;
+		virtual void operator() ( string recvd_line, IRCBot *circ ) = 0;
 
 };
 

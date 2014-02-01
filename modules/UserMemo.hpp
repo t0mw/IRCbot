@@ -2,6 +2,7 @@
 #define __MEMO_HPP__
 
 #include "../BotFunctor.hpp"
+#include "../IRCBot.hpp"
 #include <string>
 #include <map>
 
@@ -11,8 +12,8 @@ class UserMemo : public BotFunctor {
 
 		UserMemo();
 
-		void operator() ( std::string recvd_line, IRC *circ );
-		void memo_send( std::string nick, IRC *circ );
+		void operator() ( std::string recvd_line, IRCBot *circ );
+		void memo_send( std::string nick, IRCBot *circ );
 		void set_memo_max( int new_max );
 
 	private:

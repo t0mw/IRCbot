@@ -14,12 +14,12 @@ using namespace std;
 
 class BotFunctor;
 
-class IRC {
+class IRCBot {
 
 	public:
 
-		IRC();
-		~IRC();
+		IRCBot();
+		~IRCBot();
 
 		void set_server( string server, string services_id_msg = "are now identified", string motd_end_line = ":End of /MOTD command." );
 		void set_nick( string );
