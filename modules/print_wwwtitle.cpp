@@ -33,7 +33,7 @@ void print_wwwtitle( string nick, string channel, string msg, IRC *circ ) {
         buf += " :";
         buf += title;
         buf += "\r\n";
-        circ->send_d( buf );
+        circ->send_raw( buf );
     }
 
 }
