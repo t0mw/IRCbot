@@ -3,6 +3,7 @@
 
 void IRCParser::parse( std::string &input ) {
 
+	this->reset();
 	this->parser_state = READ_START;
 	
 	for( auto irc_char : input ) {

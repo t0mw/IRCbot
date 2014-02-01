@@ -318,7 +318,6 @@ void IRC::start() {
 
 				string channel;
 				channel = get_channel_from_str( buf, 512 );
-				printf("Got chan: %s\n", channel.c_str() );
 
 				auto chan_specific_handlers = this->handlers.equal_range( channel );
 

@@ -18,7 +18,6 @@ class EchoFunctor : public BotFunctor {
 
 			try {
 
-				circ->parser.reset();
 				circ->parser.parse( msg );
 
 				if( circ->parser.get_command() == "PRIVMSG" ) {
@@ -54,7 +53,8 @@ int main() {
 		newirc.set_nick( "test94384" );
 
 		newirc.add_channel( "#chujemuje" );
-		newirc.register_handler( "#chujemuje", new EchoFunctor() );
+		newirc.register_handler( "#chujemuje", new EchoFunctor );
+		newirc.register_handler( "#chujemuje", new PrintWWWTitle );
 
 		newirc.add_channel( "#mujechuje" );
 
