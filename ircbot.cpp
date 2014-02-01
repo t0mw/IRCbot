@@ -4,7 +4,7 @@
 #include <cstring>
 #include <stdexcept>
 
-#ifdef WIN32
+#ifdef _WIN32
 	#include <winsock2.h>
 #else
 	#include <unistd.h>
@@ -67,6 +67,7 @@ void IRC::register_handler( string channel, BotFunctor *fctr ) {
 	for( vector<string>::iterator it = this->channels.begin(); it != this->channels.end(); ++it ) {
 		if( *it == channel ) {
 			this->handlers.insert( pair< string, BotFunctor *>( channel, fctr ) );
+			return;
 		}
 	}
 
@@ -76,7 +77,7 @@ void IRC::register_handler( string channel, BotFunctor *fctr ) {
 
 void IRC::send_raw( string data ) {
 
-	#ifdef WIN32
+	#ifdef _WIN32
 		send( this->sockfd, data.c_str(), data.length(), 0 );
 	#else
 		write( this->sockfd, data.c_str(), data.length() );
@@ -97,86 +98,13 @@ void IRC::send_pm( string dest, string message ) {
 
 }
 
-#ifndef WIN32
+#ifndef _WIN32
 void IRC::daemon_mode( bool a ) {
 
 	this->daemon_mode_flag = a;
 
 }
 #endif
-
-void IRC::parse_pm( string recvd_line, string &nick, string &channel, string &msg ) {
-
-	// check if privmsg
-	// :nick!ident@host PRIVMSG #channel :message\r\n
-	int start = 0;
-	while( recvd_line[start] != ' ' ) start++;
-	start++;
-	if( recvd_line.substr( start, 8 ) == "PRIVMSG " ) {
-
-		int end;
-
-		// get channel
-		start += 8; // after: ...PRIVMSG [start]#channel\r\n
-		end = start;
-		while( recvd_line[end] != ' ' ) end++;
-		channel = recvd_line.substr( start, end-start );
-
-		// get msg
-		end += 2;   // after: ...PRIVMSG #channel :[end]msg\r\n
-		start = end;
-		while( recvd_line[end] != '\r' ) end++;
-		msg = recvd_line.substr( start, end-start );
-
-		// get nick
-		start = 0;
-		while( recvd_line[start] != ':' ) start++;
-		start++;
-		end = start;
-		while( recvd_line[end] != '!' ) end++;
-		nick = recvd_line.substr( start, end-start );
-
-	} else {
-		// not privmsg - not interesting
-		nick = "";
-		channel = "";
-		msg = "";
-	}
-
-}
-
-void IRC::parse_join( string recvd_line, string &nick, string &channel ) {
-
-	// check if join
-	// :nick!ident@host JOIN #channel\r\n
-	int start = 0;
-	while( recvd_line[start] != ' ' ) start++;  // after: ...[start]JOIN #chan
-	start++;
-	if( recvd_line.substr( start, 5 ) == "JOIN " ) {
-
-		int end;
-
-		// get channel
-		start += 5; // after: ...JOIN [start]#channel
-		end = start;
-		while( recvd_line[end] != ' ' && recvd_line[end] != '\r' ) end++;
-		channel = recvd_line.substr( start, end-start );
-
-		// get nick
-		start = 0;
-		while( recvd_line[start] != ':' ) start++;
-		start++;
-		end = start;
-		while( recvd_line[end] != '!' ) end++;
-		nick = recvd_line.substr( start, end-start );
-
-	} else {
-		// not join - not interesting
-		nick = "";
-		channel = "";
-	}
-
-}
 
 bool IRC::init_irc_conn() {
 
@@ -216,7 +144,7 @@ bool IRC::services_id() {
 		int max_id_checks = 100;
 		int bytes_received = 0;
 		char buf[512];
-		#ifdef WIN32
+		#ifdef _WIN32
 		while( this->send_raw(ircprot_buf), ( bytes_received = recv( this->sockfd, buf, sizeof(buf), 0 ) ) > 0 ) {
 		#else
 		while( this->send_raw(ircprot_buf), ( bytes_received = read( this->sockfd, buf, sizeof(buf) ) ) > 0 ) {
@@ -293,7 +221,7 @@ void IRC::bot_log( const char *format, ... ) {
 
 void IRC::server_connect() {
 
-	#ifdef WIN32
+	#ifdef _WIN32
 		WORD version = MAKEWORD( 2, 0 );
 		WSADATA wsaData;
 		if( WSAStartup( version, &wsaData ) != 0 ) {
@@ -320,7 +248,7 @@ void IRC::server_connect() {
 	memset( &(st_sin.sin_zero), '\0', 8 );
 
 	if( connect( this->sockfd, (struct sockaddr *)&st_sin, sizeof(st_sin) ) < 0 ) {
-		throw( "connect() error!\n" );
+		throw runtime_error( "connect() error!\n" );
 	}
 
 }
@@ -340,7 +268,7 @@ void IRC::start() {
 	bot_log( "Ignoring MOTD... " );
 
 	int bytes_received = 0;  // bytes received
-	#ifdef WIN32
+	#ifdef _WIN32
 		bytes_received = recv( this->sockfd, buf, sizeof( buf ), 0 );
 	#else
 		n = read( this->sockfd, buf, sizeof(buf) );
@@ -376,7 +304,7 @@ void IRC::start() {
 
 				this->prolog_end = true;
 
-				#ifndef WIN32
+				#ifndef _WIN32
 					if( this->daemon_mode_flag == true ) {
 						bot_log( "Entering daemon mode.\n" );
 						daemon( 1, 0 );
@@ -392,34 +320,16 @@ void IRC::start() {
 				channel = get_channel_from_str( buf, 512 );
 				printf("Got chan: %s\n", channel.c_str() );
 
-				pair<multimap<string, BotFunctor *>::iterator, multimap<string, BotFunctor *>::iterator> chan_specific_handlers = this->handlers.equal_range( channel );
+				auto chan_specific_handlers = this->handlers.equal_range( channel );
 
-				for( multimap<string, BotFunctor *>::iterator it = chan_specific_handlers.first; it != chan_specific_handlers.second; ++it ) {
-					bot_log( "Executing functor for chan: %s (type: %d)\n", it->first.c_str(), it->second->get_handler_type() );
+				for( auto it = chan_specific_handlers.first; it != chan_specific_handlers.second; ++it ) {
 
-					string nick, channel, msg;
+					bot_log( "Executing functor for chan: %s\n", it->first.c_str() );
 
-					int type = it->second->get_handler_type();
-
-					if( type & BotFunctor::HDLR_PM ) {
-						printf("Parsing pm\n");
-						this->parse_pm( buf, nick, channel, msg );
-						(*(it->second))( nick, channel, msg, this );
-					}
-
-					if( type & BotFunctor::HDLR_JOIN ) {
-						printf("Parsing join\n");
-						this->parse_join( buf, nick, channel );
-						if( !nick.empty() && !channel.empty() ) {
-							(*(it->second))( nick, channel, this );
-						}
-					}
-
-					if( type & BotFunctor::HDLR_STR ) {
-						(*(it->second))( buf, this );
-					}
+					(*(it->second))( buf, this );
 
 				}
+
 			}
 		
 		}
@@ -430,7 +340,7 @@ void IRC::start() {
 		}
 
 		memset( buf, '\0', sizeof(buf) );
-		#ifdef WIN32
+		#ifdef _WIN32
 			bytes_received = recv( this->sockfd, buf, sizeof( buf ), 0 );
 		#else
 			bytes_received = read( this->sockfd, buf, sizeof( buf ) );
@@ -445,7 +355,7 @@ void IRC::quit() {
 
 	// delete functors ...
 
-	#ifdef WIN32
+	#ifdef _WIN32
 		closesocket( this->sockfd );
 	#else
 		close( this->sockfd );

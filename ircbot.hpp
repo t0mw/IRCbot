@@ -2,6 +2,7 @@
 #define __IRCBOT_HPP__
 
 #include "BotFunctor.hpp"
+#include "IRCParser/IRCParser.hpp"
 #include <string>
 #include <vector>
 #include <map>
@@ -42,10 +43,9 @@ class IRC {
 		// Quits ircbot. Can be called by handlers.
 		void quit();
 
-	private:
+		IRCParser parser;
 
-		void parse_pm( string recvd_line, string &nick, string &channel, string &msg );
-		void parse_join( string recvd_line, string &nick, string &channel );
+	private:
 
 		bool init_irc_conn();
 		bool services_id();

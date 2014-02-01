@@ -13,7 +13,7 @@ class BotMemo : public BotFunctor {
 
 	public:
 
-		BotMemo( BotFunctor::handler_types type ) : BotFunctor( type ) {
+		BotMemo() : BotFunctor() {
 
 		}
 

@@ -5,57 +5,58 @@
 #include "modules/memo.hpp"
 #include <cstdio>
 #include <iostream>
+#include <stdexcept>
 #include <signal.h>
 
 class EchoFunctor : public BotFunctor {
 
 	public:
 
-		EchoFunctor( BotFunctor::handler_types type ) : BotFunctor( type ) {
-
-		}
-
-		void operator() ( string nick, string channel, string msg, IRC *circ ) {
-			if( msg.find( "echo" ) != string::npos ) {
-				circ->send_pm( channel, msg );
-			}
-		}
-
-		void operator() ( string nick, string channel, IRC *circ ) {
-			string resp = nick;
-			resp += " wlaz na kanal";
-			circ->send_pm( channel, resp );
-		}
-
 		void operator() ( string msg, IRC *circ ) {
-			if( msg.find( "widmo" ) != string::npos ) {
-				circ->send_pm( "widmo", msg );
+
+			std::cout << "EchoFunctor start.\n";
+
+			try {
+
+				circ->parser.reset();
+				circ->parser.parse( msg );
+
+				if( circ->parser.get_command() == "PRIVMSG" ) {
+					std::cout << "\tCommand: " << circ->parser.get_command() << std::endl <<
+								 "\tChannel: " << circ->parser.get_param(0) << std::endl <<
+								 "\tMessage: " << circ->parser.get_param(1) << std::endl;
+					circ->send_pm( circ->parser.get_param(0), circ->parser.get_param(1) );
+				}
+
+			} catch( std::exception &e ) {
+				printf( "EchoFunctor error: %s\n", e.what() );
 			}
+
+			std::cout << "EchoFunctor end.\n";
+
 		}
 
 };
 
 /*
 	TODO:
-		- string functors
-		- enum - operator `|`
-		- IRC messages scalable parser class
 		- UTF-8 support
+		- logging class
 */
 
 int main() {
 
 	IRC newirc;
 
-	newirc.set_server( "holmes.freenode.net" );
-	newirc.set_nick( "test94384" );
-
-	newirc.add_channel( "#chujemuje" );
-	newirc.register_handler( "#chujemuje", new EchoFunctor( BotFunctor::HDLR_PM | BotFunctor::HDLR_JOIN | BotFunctor::HDLR_STR ) );
-
-	newirc.add_channel( "#mujechuje" );
-
 	try {
+
+		newirc.set_server( "holmes.freenode.net" );
+		newirc.set_nick( "test94384" );
+
+		newirc.add_channel( "#chujemuje" );
+		newirc.register_handler( "#chujemuje", new EchoFunctor() );
+
+		newirc.add_channel( "#mujechuje" );
 
 		newirc.start();
 
@@ -68,8 +69,3 @@ int main() {
 	return 0;
 
 }
-
-
-
-
-
