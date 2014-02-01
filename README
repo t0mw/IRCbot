@@ -1,1 +1,4 @@
 IRC bot "API", with basic IRC protocol handling and simple "modules" support (some examples in /modules).
+
+Use example in main.cpp. Makefile used with MinGW.
+
