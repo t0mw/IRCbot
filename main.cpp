@@ -1,12 +1,11 @@
 #include "ircbot.hpp"
 #include "BotFunctor.hpp"
 #include "modules/sjp_pwn_info.hpp"
-#include "modules/print_wwwtitle.hpp"
-#include "modules/memo.hpp"
+#include "modules/PrintWWWTitle.hpp"
+#include "modules/UserMemo.hpp"
 #include <cstdio>
 #include <iostream>
 #include <stdexcept>
-#include <signal.h>
 
 class EchoFunctor : public BotFunctor {
 
@@ -25,6 +24,11 @@ class EchoFunctor : public BotFunctor {
 								 "\tChannel: " << circ->parser.get_param(0) << std::endl <<
 								 "\tMessage: " << circ->parser.get_param(1) << std::endl;
 					circ->send_pm( circ->parser.get_param(0), circ->parser.get_param(1) );
+
+					if( circ->parser.get_param(1) == "quit" ) {
+						circ->quit();
+					}
+
 				}
 
 			} catch( std::exception &e ) {
@@ -55,6 +59,7 @@ int main() {
 		newirc.add_channel( "#chujemuje" );
 		newirc.register_handler( "#chujemuje", new EchoFunctor );
 		newirc.register_handler( "#chujemuje", new PrintWWWTitle );
+		newirc.register_handler( "#chujemuje", new UserMemo );
 
 		newirc.add_channel( "#mujechuje" );
 

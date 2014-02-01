@@ -24,7 +24,9 @@ IRC::IRC() {
 
 IRC::~IRC() {
 
-	// it thrgh bector, delete on ecery elem
+	for( auto it : this->handlers ) {
+		delete it.second;
+	}
 
 }
 
@@ -50,7 +52,7 @@ void IRC::set_services_passwd( string newpass ) {
 
 bool IRC::add_channel( string new_channel ) {
 
-	for( vector<string>::iterator it = this->channels.begin(); it != this->channels.end(); ++it ) {
+	for( auto it = this->channels.begin(); it != this->channels.end(); ++it ) {
 		if( *it == new_channel ) {
 			return false;
 		}
@@ -64,9 +66,9 @@ bool IRC::add_channel( string new_channel ) {
 void IRC::register_handler( string channel, BotFunctor *fctr ) {
 
 	// Check if channel in channels list.
-	for( vector<string>::iterator it = this->channels.begin(); it != this->channels.end(); ++it ) {
+	for( auto it = this->channels.begin(); it != this->channels.end(); ++it ) {
 		if( *it == channel ) {
-			this->handlers.insert( pair< string, BotFunctor *>( channel, fctr ) );
+			this->handlers.insert( std::pair< string, BotFunctor *>( channel, fctr ) );
 			return;
 		}
 	}
@@ -114,8 +116,7 @@ bool IRC::init_irc_conn() {
 
 	bot_log( "Setting user & nick... " );
 
-	string ircprot_buf; // stores IRC protocol messages to send
-
+	string ircprot_buf;
 	ircprot_buf = "USER ";
 	ircprot_buf += this->nick;
 	ircprot_buf += " asd asd :usr\nNICK ";
@@ -145,9 +146,9 @@ bool IRC::services_id() {
 		int bytes_received = 0;
 		char buf[512];
 		#ifdef _WIN32
-		while( this->send_raw(ircprot_buf), ( bytes_received = recv( this->sockfd, buf, sizeof(buf), 0 ) ) > 0 ) {
+			while( this->send_raw(ircprot_buf), ( bytes_received = recv( this->sockfd, buf, sizeof(buf), 0 ) ) > 0 ) {
 		#else
-		while( this->send_raw(ircprot_buf), ( bytes_received = read( this->sockfd, buf, sizeof(buf) ) ) > 0 ) {
+			while( this->send_raw(ircprot_buf), ( bytes_received = read( this->sockfd, buf, sizeof(buf) ) ) > 0 ) {
 		#endif
 			if( max_id_checks-- < 0 ) {
 				break;
@@ -274,15 +275,13 @@ void IRC::start() {
 		n = read( this->sockfd, buf, sizeof(buf) );
 	#endif
 
-	string ircprot_buf; // Stores IRC protocol messages to send.
-
 	// IRCBot superloop.
 	while( bytes_received > 0 ) {
 		
 		#ifdef SUPER_VERBOSE
 			cout << buf;
 		#endif
-		
+
 		// handle ping & pong
 		if( strncmp( buf, "PING", 4 ) == 0 ) {
 			buf[1] = 'I'; // P(I->O)NG
@@ -299,7 +298,6 @@ void IRC::start() {
 				services_id();
 				bot_log( "done.\n" );
 
-				// Joining channels
 				join_channels();
 
 				this->prolog_end = true;
@@ -320,13 +318,9 @@ void IRC::start() {
 				channel = get_channel_from_str( buf, 512 );
 
 				auto chan_specific_handlers = this->handlers.equal_range( channel );
-
 				for( auto it = chan_specific_handlers.first; it != chan_specific_handlers.second; ++it ) {
-
 					bot_log( "Executing functor for chan: %s\n", it->first.c_str() );
-
 					(*(it->second))( buf, this );
-
 				}
 
 			}
@@ -351,8 +345,6 @@ void IRC::start() {
 void IRC::quit() {
 
 	this->send_raw( "QUIT :quit\r\n" );
-
-	// delete functors ...
 
 	#ifdef _WIN32
 		closesocket( this->sockfd );
