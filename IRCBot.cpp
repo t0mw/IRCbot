@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstdio>
 #include <cstring>
+#include <cstdarg>
 #include <stdexcept>
 
 #ifdef _WIN32
@@ -101,7 +102,7 @@ void IRCBot::send_pm( string dest, string message ) {
 }
 
 #ifndef _WIN32
-void IRC::daemon_mode( bool a ) {
+void IRCBot::daemon_mode( bool a ) {
 
 	this->daemon_mode_flag = a;
 
@@ -272,7 +273,7 @@ void IRCBot::start() {
 	#ifdef _WIN32
 		bytes_received = recv( this->sockfd, buf, sizeof( buf ), 0 );
 	#else
-		n = read( this->sockfd, buf, sizeof(buf) );
+		bytes_received = read( this->sockfd, buf, sizeof(buf) );
 	#endif
 
 	// IRCBot superloop.
@@ -284,7 +285,7 @@ void IRCBot::start() {
 
 		// handle ping & pong
 		if( strncmp( buf, "PING", 4 ) == 0 ) {
-			buf[1] = 'I'; // P(I->O)NG
+			buf[1] = 'O'; // P(I->O)NG
 			this->send_raw( buf );
 		}
 		
